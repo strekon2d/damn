@@ -159,10 +159,13 @@ export const useAllTokenHighLight = (targetChainName?: MultiChainNameExtend): To
   }, [isLoading, tokensWithData])
 }
 
-export const useAllTokenDataSWR = (): {
+export const useAllTokenDataSWR = (
+  targetChainName?: MultiChainNameExtend,
+): {
   [address: string]: { data?: TokenData }
 } => {
-  const chainName = useChainNameByQuery()
+  const chainNameByQuery = useChainNameByQuery()
+  const chainName = targetChainName ?? chainNameByQuery
   const [t24h, t48h, t7d, t14d] = getDeltaTimestamps()
   const { blocks } = useBlockFromTimeStampSWR([t24h, t48h, t7d, t14d])
   const type = checkIsStableSwap() ? 'stableSwap' : 'swap'
@@ -176,7 +179,7 @@ export const useAllTokenDataSWR = (): {
 
 const graphPerPage = 50
 
-const fetcher = (addresses: string[], chainName: MultiChainName, blocks: Block[]) => {
+const fetcher = (addresses: string[], chainName: MultiChainNameExtend, blocks: Block[]) => {
   const times = Math.ceil(addresses.length / graphPerPage)
   const addressGroup = []
   for (let i = 0; i < times; i++) {
@@ -185,11 +188,16 @@ const fetcher = (addresses: string[], chainName: MultiChainName, blocks: Block[]
   return Promise.all(addressGroup.map((d) => fetchAllTokenDataByAddresses(chainName, blocks, d)))
 }
 
-export const useTokenDatasSWR = (addresses?: string[], withSettings = true): TokenData[] | undefined => {
+export const useTokenDatasSWR = (
+  addresses?: string[],
+  withSettings = true,
+  targetChainName?: MultiChainNameExtend,
+): TokenData[] | undefined => {
   const name = addresses?.join('')
-  const chainName = useChainNameByQuery()
+  const chainNameByQuery = useChainNameByQuery()
+  const chainName = targetChainName ?? chainNameByQuery
   const [t24h, t48h, t7d, t14d] = getDeltaTimestamps()
-  const { blocks } = useBlockFromTimeStampSWR([t24h, t48h, t7d, t14d])
+  const { blocks } = useBlockFromTimeStampSWR([t24h, t48h, t7d, t14d], undefined, undefined, chainName)
   const type = checkIsStableSwap() ? 'stableSwap' : 'swap'
   const { data, isLoading } = useSWRImmutable(
     blocks && chainName && [`info/token/data/${name}/${type}`, chainName],

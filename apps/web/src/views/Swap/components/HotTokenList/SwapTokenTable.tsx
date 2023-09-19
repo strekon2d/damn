@@ -287,6 +287,9 @@ const TokenTable: React.FC<
       setMaxPage(Math.floor(tokenDatas.length / maxItems) + extraPages)
     }
   }, [maxItems, tokenDatas])
+  useEffect(() => {
+    setPage(1)
+  }, [tokenDatas])
 
   const sortedTokens = useMemo(() => {
     return tokenDatas
@@ -394,7 +397,7 @@ const TokenTable: React.FC<
             {sortedTokens.map((data, i) => {
               if (data) {
                 return (
-                  <Fragment key={data.address}>
+                  <Fragment key={`V${dataSource}+${data.address}+${sortField}+${defaultSortField}`}>
                     <DataRow
                       dataSource={dataSource}
                       index={(page - 1) * MAX_ITEMS + i}
