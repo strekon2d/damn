@@ -14,11 +14,11 @@ import {
 } from 'state/buyCrypto/hooks'
 import { Field } from 'state/swap/actions'
 import { useTheme } from 'styled-components'
-import { CryptoFormView } from 'views/BuyCrypto/types'
+import { CryptoFormView, ProviderAvailabilities } from 'views/BuyCrypto/types'
 import { useChainId } from 'wagmi'
 import GetQuotesButton from '../components/GetQuotesButton'
 import { CurrencySelect } from '../components/OnRampCurrencySelect'
-import { fiatCurrencyMap, getChainCurrencyWarningMessages } from '../constants'
+import { fiatCurrencyMap, getChainCurrencyWarningMessages, parseDisabledProviders } from '../constants'
 import { FormContainer } from './FormContainer'
 import { FormHeader } from './FormHeader'
 
@@ -29,9 +29,13 @@ const allowTwoDecimalRegex = RegExp(`^\\d+(\\.\\d{0,2})?$`)
 export function BuyCryptoForm({
   setModalView,
   fetchQuotes,
+  isAvailabilitiesLoading,
+  providerAvailabilities,
 }: {
   setModalView: Dispatch<SetStateAction<CryptoFormView>>
   fetchQuotes: () => Promise<void>
+  isAvailabilitiesLoading: boolean
+  providerAvailabilities: ProviderAvailabilities
 }) {
   const { t } = useTranslation()
   const chainId = useChainId()
@@ -114,6 +118,9 @@ export function BuyCryptoForm({
     [handleCurrencySelect],
   )
 
+  const disabledProviders = Object.keys(providerAvailabilities).filter((provider) =>
+    Boolean(!providerAvailabilities[provider]),
+  )
   return (
     <Box p="4px">
       <FormHeader title={t('Buy Crypto')} subTitle={t('Buy crypto in just a few clicks')} />
@@ -153,10 +160,24 @@ export function BuyCryptoForm({
             </Text>
           </Message>
         ) : null}
+        {disabledProviders.length > 0 && !isAvailabilitiesLoading ? (
+          <Message variant="warning" padding="16px">
+            <Text fontSize="15px" color="#D67E0B">
+              {`Due to your location, quotes from ${parseDisabledProviders(
+                disabledProviders,
+              )} are currently unavailable`}
+            </Text>
+          </Message>
+        ) : null}
         <Text color="textSubtle" fontSize="14px" px="4px">
           {t('Proceed to get live aggregated quotes from a variety of different fiat onramp providers.')}
         </Text>
-        <GetQuotesButton errorText={inputError} setModalView={setModalView} fetchQuotes={fetchQuotes} />
+        <GetQuotesButton
+          errorText={inputError}
+          setModalView={setModalView}
+          fetchQuotes={fetchQuotes}
+          isAvailabilitiesLoading={isAvailabilitiesLoading}
+        />
       </FormContainer>
     </Box>
   )
