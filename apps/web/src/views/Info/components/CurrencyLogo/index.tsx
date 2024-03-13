@@ -1,11 +1,10 @@
-import { Token } from '@pancakeswap/sdk'
+import { useHttpLocations } from '@pancakeswap/hooks'
+import { Currency, Token } from '@pancakeswap/sdk'
 import { TokenLogo } from '@pancakeswap/uikit'
+import { getCurrencyLogoUrls } from '@pancakeswap/widgets-internal'
 import { useMemo } from 'react'
-import { multiChainId, MultiChainName } from 'state/info/constant'
+import { MultiChainName } from 'state/info/constant'
 import { styled } from 'styled-components'
-import { safeGetAddress } from 'utils'
-import { Address } from 'viem'
-import getTokenLogoURL from '../../../../utils/getTokenLogoURL'
 
 const StyledLogo = styled(TokenLogo)<{ size: string }>`
   width: ${({ size }) => size};
@@ -20,20 +19,30 @@ export const CurrencyLogo: React.FC<
   React.PropsWithChildren<{
     address?: string
     token?: Token
+    currency?: Currency & {
+      logoURI?: string | undefined
+    }
     size?: string
     chainName?: MultiChainName
   }>
-> = ({ address, size = '24px', chainName = 'BSC', ...rest }) => {
-  const src = useMemo(() => {
-    return getTokenLogoURL(new Token(multiChainId[chainName], address as Address, 18, ''))
-  }, [address, chainName])
+> = ({ currency, size = '24px', ...rest }) => {
+  const uriLocations = useHttpLocations(currency?.logoURI)
 
-  const imagePath = chainName === 'BSC' ? '' : `${chainName?.toLowerCase()}/`
-  const checkedsummedAddress = safeGetAddress(address)
-  const srcFromPCS = checkedsummedAddress
-    ? `https://tokens.pancakeswap.finance/images/${imagePath}${checkedsummedAddress}.png`
-    : ''
-  return <StyledLogo size={size} srcs={[srcFromPCS, src]} alt="token logo" useFilledIcon {...rest} />
+  const srcs: string[] = useMemo(() => {
+    if (currency?.isNative) return []
+
+    if (currency?.isToken) {
+      const logoUrls = getCurrencyLogoUrls(currency, { useTrustWallet: true })
+
+      if (currency?.logoURI) {
+        return [...uriLocations, ...logoUrls]
+      }
+      return [...logoUrls]
+    }
+    return []
+  }, [currency, uriLocations])
+
+  return <StyledLogo size={size} srcs={srcs} alt="token logo" useFilledIcon {...rest} />
 }
 
 const DoubleCurrencyWrapper = styled.div`
