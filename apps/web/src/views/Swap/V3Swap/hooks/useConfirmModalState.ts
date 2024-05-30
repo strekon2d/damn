@@ -376,22 +376,18 @@ export const useConfirmModalState = (
     [],
   )
 
-  const callToAction = useCallback(async () => {
+  const callToAction = useCallback(() => {
     const steps = createSteps()
     setConfirmSteps(steps)
     const stepActions = steps.map((step) => actions[step])
     const nextStep = steps[1] ?? undefined
-
-    const checkPassed = await swapPreflightCheck()
-
-    if (!checkPassed) return
 
     performStep({
       nextStep,
       stepActions,
       state: steps[0],
     })
-  }, [actions, createSteps, performStep, swapPreflightCheck])
+  }, [actions, createSteps, performStep])
 
   // auto perform the next step
   useEffect(() => {
