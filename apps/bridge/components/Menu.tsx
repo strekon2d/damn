@@ -1,8 +1,11 @@
+import { useTranslation } from '@pancakeswap/localization'
 import { Box, DropdownMenu, DropdownMenuItemType, Flex, Logo, ThemeSwitcher } from '@pancakeswap/uikit'
 import { useTheme as useNextTheme } from 'next-themes'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
+import { useEnableWormholeMainnet } from 'state/wormhole/enableTestnet'
 import { styled, useTheme } from 'styled-components'
+import { WormholeEnvToggle } from './WormholeToggle'
 
 const StyledMenuItem = styled('div')<{ $isActive?: boolean }>`
   position: relative;
@@ -70,6 +73,8 @@ const MenuConfig = [
 ]
 
 export function Menu() {
+  const [enableMainnet, setEnableMainnet] = useEnableWormholeMainnet()
+  const { t } = useTranslation()
   const theme = useTheme()
   const { setTheme } = useNextTheme()
   const nextRouter = useRouter()
@@ -107,7 +112,8 @@ export function Menu() {
         </Flex>
       </Flex>
       <Flex alignItems="center">
-        <Box mr="16px">
+        <WormholeEnvToggle />
+        <Box mx="16px">
           <ThemeSwitcher isDark={theme.isDark} toggleTheme={() => setTheme(theme.isDark ? 'light' : 'dark')} />
         </Box>
       </Flex>
