@@ -1,5 +1,18 @@
 import BigNumber from 'bignumber.js'
 
+type ModifiedLocalNumberOptions = Omit<
+  Intl.NumberFormatOptions,
+  'currency' | 'style' | 'minimumFractionDigits' | 'maximumFractionDigits'
+>
+
+type FiatCurrencyNumberDisplayOptions = {
+  value: string | number | BigNumber
+  locale: string | undefined
+  fiatCurrencyCode: string
+  useFullDigits?: boolean
+  options?: ModifiedLocalNumberOptions
+}
+
 const ZERO = new BigNumber(0)
 const ONE = new BigNumber(1)
 const TEN = new BigNumber(10)
@@ -58,10 +71,57 @@ export function formatNumber(
   return `${limitIndicator}${valueToDisplay}`
 }
 
+export function formatFiatNumber({
+  value,
+  locale,
+  fiatCurrencyCode,
+  useFullDigits = false,
+  options = {},
+}: FiatCurrencyNumberDisplayOptions) {
+  const numericValue = new BigNumber(value)
+  const [, decimalDigits] = getDigits(numericValue)
+
+  const fractionDigits = numericValue.lt(0.01) ? (useFullDigits ? 12 : decimalDigits) : 2
+  const numberString = Number.parseFloat(numericValue.toFixed(fractionDigits))
+
+  const formattedNumber = numberString.toLocaleString(locale, {
+    ...options,
+    style: 'currency',
+    currency: fiatCurrencyCode.toUpperCase(),
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  })
+
+  const currencySymbol = formattedNumber[0]
+  const currencyNumberValue = Number.parseFloat(formattedNumber.slice(1).replace(/,/g, ''))
+
+  const valueInBN = new BigNumber(currencyNumberValue)
+  if (valueInBN.eq(ZERO) || useFullDigits) return `${currencySymbol}${valueInBN}`
+
+  const valueToDisplay = formatLargeFiatValue(valueInBN, currencySymbol, fractionDigits)
+  return valueToDisplay
+}
+
 export function formatNumberWithFullDigits(
   value: string | number | BigNumber,
   options?: Omit<Options, 'maximumSignificantDigits'>,
 ) {
   const valueInBN = new BigNumber(value)
   return formatNumber(valueInBN, { ...options, maximumSignificantDigits: getTotalDigits(valueInBN) })
+}
+
+function formatLargeFiatValue(numericValue: BigNumber, currencySymbol: string, fractionDigits: number): string {
+  const formattedValue = numericValue.toFormat(fractionDigits, BigNumber.ROUND_UP, DEFAULT_FORMAT_CONFIG)
+
+  if (numericValue.gt(BigNumber(10_000)) && numericValue.lt(BigNumber(1_000_000))) {
+    return `> ${currencySymbol}${numericValue.div(1000).toFixed(0)}K`
+  }
+  if (numericValue.gt(BigNumber(1_000_000))) {
+    return `> ${currencySymbol}${numericValue.div(1_000_000).toFixed(0)}M`
+  }
+  if (numericValue.lt(BigNumber(0.01))) {
+    return `< ${currencySymbol}${BigNumber(0.01)}`
+  }
+
+  return `${currencySymbol}${formattedValue}`
 }
