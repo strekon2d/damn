@@ -4,7 +4,7 @@ import { getPermit2Address } from '@pancakeswap/permit2-sdk'
 import { SmartRouterTrade } from '@pancakeswap/smart-router'
 import { Currency, CurrencyAmount, Percent, Token, TradeType } from '@pancakeswap/swap-sdk-core'
 import { Permit2Signature } from '@pancakeswap/universal-router-sdk'
-import { ConfirmModalState, confirmPriceImpactWithoutFee } from '@pancakeswap/widgets-internal'
+import { ConfirmModalState, useAsyncConfirmPriceImpactWithoutFee } from '@pancakeswap/widgets-internal'
 import { ALLOWED_PRICE_IMPACT_HIGH, PRICE_IMPACT_WITHOUT_FEE_CONFIRM_MIN } from 'config/constants/exchange'
 import useAccountActiveChain from 'hooks/useAccountActiveChain'
 import { useActiveChainId } from 'hooks/useActiveChainId'
@@ -341,20 +341,20 @@ export const useConfirmModalState = (
   const preConfirmState = usePreviousValue(confirmState)
   const [confirmSteps, setConfirmSteps] = useState<ConfirmModalState[]>()
   const tradePriceBreakdown = useMemo(() => computeTradePriceBreakdown(trade), [trade])
-  const swapPreflightCheck = useCallback(() => {
-    if (
-      tradePriceBreakdown &&
-      !confirmPriceImpactWithoutFee(
-        tradePriceBreakdown.priceImpactWithoutFee as Percent,
-        PRICE_IMPACT_WITHOUT_FEE_CONFIRM_MIN,
-        ALLOWED_PRICE_IMPACT_HIGH,
-        t,
-      )
-    ) {
-      return false
+  const confirmPriceImpactWithoutFee = useAsyncConfirmPriceImpactWithoutFee(
+    tradePriceBreakdown?.priceImpactWithoutFee as Percent,
+    PRICE_IMPACT_WITHOUT_FEE_CONFIRM_MIN,
+    ALLOWED_PRICE_IMPACT_HIGH,
+  )
+  const swapPreflightCheck = useCallback(async () => {
+    if (tradePriceBreakdown) {
+      const confirmed = await confirmPriceImpactWithoutFee()
+      if (!confirmed) {
+        return false
+      }
     }
     return true
-  }, [t, tradePriceBreakdown])
+  }, [confirmPriceImpactWithoutFee, tradePriceBreakdown])
 
   const createSteps = useCreateConfirmSteps(amountToApprove, spender)
   const confirmActions = useMemo(() => {
@@ -388,14 +388,12 @@ export const useConfirmModalState = (
     const stepActions = steps.map((step) => actions[step])
     const nextStep = steps[1] ?? undefined
 
-    if (!swapPreflightCheck()) return
-
     performStep({
       nextStep,
       stepActions,
       state: steps[0],
     })
-  }, [actions, createSteps, performStep, swapPreflightCheck])
+  }, [actions, createSteps, performStep])
 
   // auto perform the next step
   useEffect(() => {
