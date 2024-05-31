@@ -28,6 +28,10 @@ export const getLotteryV2Address = () => {
 export const getPancakeProfileAddress = () => {
   return getAddressFromMap(addresses.pancakeProfile)
 }
+export const getPancakeProfileProxyAddress = (chainId: number) => {
+  return getAddressFromMap(addresses.pancakeProfileProxy, chainId)
+}
+
 export const getPancakeBunniesAddress = () => {
   return getAddressFromMap(addresses.pancakeBunnies)
 }
@@ -165,6 +169,10 @@ export const getFixedStakingAddress = (chainId?: number) => {
 
 export const getVeCakeAddress = (chainId?: number) => {
   return getAddressFromMap(addresses.veCake, chainId)
+}
+
+export const getPancakeVeSenderV2Address = (chainId?: number) => {
+  return getAddressFromMap(addresses.pancakeVeSenderV2, chainId)
 }
 
 export const getVeCakeAddressNoFallback = (chainId?: number) => {
