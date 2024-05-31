@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@datadog/browser-logs": "^5.8.0",
+    "@datadog/browser-rum": "^5.8.0",
     "@binance/w3w-wagmi-connector-v2": "^1.2.3",
     "@cyberlab/cyber-app-sdk": "v3.0.0-beta.5",
     "@gnosis.pm/safe-apps-wagmi": "^1.2.0",
@@ -17,10 +19,15 @@
     "@pancakeswap/localization": "workspace:*",
     "@pancakeswap/prediction": "workspace:*",
     "@pancakeswap/sdk": "workspace:*",
+    "@pancakeswap/achievements": "workspace:*",
+    "@pancakeswap/ifos": "workspace:*",
+    "@pancakeswap/swap-sdk-core": "workspace:*",
     "@pancakeswap/tokens": "workspace:*",
+    "@pancakeswap/multicall": "workspace:*",
     "@pancakeswap/ui-wallets": "workspace:*",
     "@pancakeswap/uikit": "workspace:*",
     "@pancakeswap/utils": "workspace:*",
+    "@pancakeswap/smart-router": "workspace:*",
     "@pancakeswap/wagmi": "workspace:*",
     "@pancakeswap/widgets-internal": "workspace:*",
     "@reduxjs/toolkit": "^1.9.1",
@@ -30,14 +37,20 @@
     "bignumber.js": "^9.1.2",
     "blocto": "link:@pancakeswap/wagmi/connectors/blocto",
     "dayjs": "^1.11.10",
+    "easymde": "2.16.1",
     "jotai": "^2.4.3",
     "lodash": "^4.17.21",
     "next": "14.2.3",
     "next-seo": "^5.15.0",
     "next-themes": "^0.2.1",
     "react": "^18.2.0",
+    "react-datepicker": "^4.8.0",
     "react-dom": "^18.2.0",
+    "react-draggable-list": "4.0.4",
+    "react-images-uploading": "^3.1.7",
+    "react-jazzicon": "^1.0.4",
     "react-redux": "^8.0.5",
+    "react-window": "^1.8.7",
     "react-wrap-balancer": "^0.4.0",
     "redux-persist": "^6.0.0",
     "split-grid": "^1.0.11",
@@ -45,7 +58,9 @@
     "swiper": "^11.0.5",
     "trustWallet": "link:@pancakeswap/wagmi/connectors/trustWallet",
     "viem": "2.9.19",
-    "wagmi": "2.5.20"
+    "wagmi": "2.5.20",
+    "graphql": "^16.8.1",
+    "graphql-request": "5.0.0"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "14.2.3",
@@ -55,9 +70,12 @@
     "@types/node": "18.0.4",
     "@types/qs": "^6.0.0",
     "@types/react": "^18.2.21",
+    "@types/react-datepicker": "^4.4.1",
     "@types/react-dom": "^18.0.6",
+    "@types/react-window": "^1.8.8",
     "@types/styled-system": "^5.1.17",
     "eslint": "^8.32.0",
-    "eslint-plugin-lodash": "^7.4.0"
+    "eslint-plugin-lodash": "^7.4.0",
+    "@types/react-redux": "^7.1.24"
   }
 }
