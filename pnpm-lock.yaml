@@ -664,6 +664,9 @@ importers:
       '@gnosis.pm/safe-apps-wagmi':
         specifier: ^1.2.0
         version: 1.2.0(@wagmi/core@2.6.17)
+      '@pancakeswap/achievements':
+        specifier: workspace:*
+        version: link:../../packages/achievements
       '@pancakeswap/chains':
         specifier: workspace:*
         version: link:../../packages/chains
